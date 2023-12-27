@@ -3,11 +3,8 @@ package org.launchcode.codingevents.controllers;
 import org.launchcode.codingevents.data.EventData;
 import org.launchcode.codingevents.models.Event;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +16,7 @@ import java.util.List;
 @RequestMapping("events")
 public class EventController {
 
-    // onve we created EventData class we have to remove the following initialize
+    // once we created EventData class we have to remove the following initialize
     //private static List<Event> events = new ArrayList<>();
     //private static List<String> events = new ArrayList<>();
 
@@ -39,10 +36,13 @@ public class EventController {
     }
 
     @PostMapping("create")
-    public String processCreateEventForm(@RequestParam String eventName, @RequestParam String eventDescription, @RequestParam String eventCountry) {
+    //to use Model binding instead of listing @RequestParam inside method let's create a single parameter line 44
+    //public String processCreateEventForm(@RequestParam String eventName, @RequestParam String eventDescription, @RequestParam String eventCountry)
+    public String processCreateEventForm(@ModelAttribute Event newEvent){
         //change the following too
         //events.add(new Event(eventName,eventDescription,eventCountry));
-        EventData.add(new Event(eventName,eventDescription,eventCountry));
+        //EventData.add(new Event(eventName,eventDescription,eventCountry)); use model binding instead
+        EventData.add(newEvent);//for model binding
         //events.add(eventName);
         return "redirect:/events";
     }
@@ -62,6 +62,28 @@ public class EventController {
                 EventData.remove(id);
             }
        }
+        return "redirect:/events";
+    }
+    //this is exercise under new branch "edit-events"
+    //Create the two handler methods listed below in EventController
+
+    // Method 1: Create a method to display an edit form with this signature:
+    @GetMapping("edit/{eventId}")
+    public String displayEditForm(Model model, @PathVariable int eventId) {
+        Event eventToEdit = EventData.getById(eventId);
+        model.addAttribute("event", eventToEdit);
+        String title = "Edit Event " + eventToEdit.getName() + " (id=" + eventToEdit.getId() + ")";
+        model.addAttribute("title", title );
+        return "events/edit";
+    }
+
+    //Method 2:Create a method to process the form with this signature:
+    @PostMapping("edit")
+    public String processEditForm(int eventId, String name, String description, String country) {
+        Event eventToEdit = EventData.getById(eventId);
+        eventToEdit.setName(name);
+        eventToEdit.setDescription(description);
+        eventToEdit.setCountry(country);
         return "redirect:/events";
     }
 
